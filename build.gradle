@@ -1,0 +1,38 @@
+plugins {
+    id 'java'
+}
+
+group 'jp.mnicloud'
+version '0.0.1'
+
+repositories {
+    mavenCentral()
+}
+
+configurations {
+    jarLibs
+}
+
+dependencies {
+    compileOnly 'org.keycloak:keycloak-core:25.0.2'
+    compileOnly 'org.keycloak:keycloak-server-spi:25.0.2'
+    compileOnly 'org.keycloak:keycloak-server-spi-private:25.0.2'
+    compileOnly 'org.keycloak:keycloak-services:25.0.2'
+    compileOnly 'org.keycloak:keycloak-saml-core-public:25.0.2'
+    compileOnly 'org.jboss.logging:jboss-logging'
+    compileOnly 'org.jboss.spec.javax.ws.rs:jboss-jaxrs-api_2.1_spec:2.0.1.Final'
+
+    jarLibs 'com.squareup.okhttp3:okhttp:3.7.0'
+    jarLibs 'com.google.code.gson:gson:2.10.1'
+    jarLibs 'com.auth0:java-jwt:4.4.0'
+
+    implementation configurations.jarLibs
+}
+
+jar {
+    from { (configurations.jarLibs).findAll { !it.name.endsWith('pom') }.collect { it.isDirectory() ? it : zipTree(it) } } {
+        exclude 'META-INF/*', 'META-INF/*.SF', 'META-INF/*.DSA'
+        exclude '*.pom'
+        duplicatesStrategy = 'EXCLUDE'
+    }
+}

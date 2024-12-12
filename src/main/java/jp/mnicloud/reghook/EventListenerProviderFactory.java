@@ -10,10 +10,6 @@ public class EventListenerProviderFactory implements org.keycloak.events.EventLi
 
     @Override
     public void init(org.keycloak.Config.Scope scope) {
-        config.REALM_ID = scope.get("realm-id");
-        if (config.REALM_ID == null) {
-            throw new RuntimeException("realm-id is required");
-        }
         config.IDENTITY_PROVIDER = scope.get("identity-provider");
         if (config.IDENTITY_PROVIDER == null) {
             throw new RuntimeException("identity-provider is required");

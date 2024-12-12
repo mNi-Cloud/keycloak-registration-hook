@@ -1,7 +1,6 @@
 package jp.mnicloud.reghook;
 
 public class Config {
-    public String REALM_ID;
     public String IDENTITY_PROVIDER;
 
     public String MNI_AUTH_ENDPOINT;

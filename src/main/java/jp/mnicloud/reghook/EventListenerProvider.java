@@ -21,7 +21,7 @@ public class EventListenerProvider implements org.keycloak.events.EventListenerP
 
     @Override
     public void onEvent(Event event) {
-        if ( event.getType() != EventType.REGISTER || !config.REALM_ID.equals(event.getRealmId())) {
+        if ( event.getType() != EventType.REGISTER ) {
             return;
         }
 

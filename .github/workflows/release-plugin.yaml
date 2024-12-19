@@ -4,8 +4,10 @@ on:
     branches: [ main ]
   pull_request:
     branches: [ main ]
+
 permissions:
   contents: write
+
 jobs:
   check_if_version_upgraded:
     runs-on: ubuntu-latest
@@ -19,10 +21,19 @@ jobs:
           fetch-depth: 2
       - id: check_version
         run: |
-          VERSION=$(grep -oP 'version\s*=\s*"\K[^"]+' build.gradle || echo "0.0.0")
-          PREV_VERSION=$(git show HEAD^:build.gradle | grep -oP 'version\s*=\s*"\K[^"]+' || echo "0.0.0")
+          VERSION=$(grep -oP "version\s*'\K[^']+" build.gradle || grep -oP 'version\s*"\K[^"]+' build.gradle || echo "0.0.0")
+          
+          if git rev-parse HEAD^ >/dev/null 2>&1 && git show HEAD^:build.gradle >/dev/null 2>&1; then
+            PREV_VERSION=$(git show HEAD^:build.gradle | grep -oP "version\s*'\K[^']+" || git show HEAD^:build.gradle | grep -oP 'version\s*"\K[^"]+' || echo "0.0.0")
+          else
+            PREV_VERSION="0.0.0"
+          fi
+          
+          echo "Current version: $VERSION"
+          echo "Previous version: $PREV_VERSION"
           
           if [ "$VERSION" != "$PREV_VERSION" ]; then
+            echo "Version changed from $PREV_VERSION to $VERSION"
             echo "is_upgraded_version=true" >> $GITHUB_OUTPUT
             echo "to_version=$VERSION" >> $GITHUB_OUTPUT
             if [[ "$VERSION" == *"-"* ]]; then
@@ -31,6 +42,7 @@ jobs:
               echo "is_pre_release=false" >> $GITHUB_OUTPUT
             fi
           else
+            echo "Version unchanged"
             echo "is_upgraded_version=false" >> $GITHUB_OUTPUT
           fi
 
@@ -50,6 +62,9 @@ jobs:
       - name: Setup Gradle
         uses: gradle/gradle-build-action@v2
       
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+        
       - name: Build with Gradle
         run: ./gradlew jar
           

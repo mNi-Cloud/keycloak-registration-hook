@@ -78,3 +78,26 @@ jobs:
           files: build/libs/*.jar
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  trigger-custom-keycloak:
+    needs: [check_if_version_upgraded, create_github_release]
+    if: |
+      needs.check_if_version_upgraded.outputs.is_upgraded_version == 'true' &&
+      github.event_name == 'push' &&
+      github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger custom-keycloak workflow
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: 'custom-keycloak',
+              workflow_id: 'release-image.yaml',
+              ref: 'main',
+              inputs: {
+                plugin_version: '${{ needs.check_if_version_upgraded.outputs.to_version }}'
+              }
+            })
